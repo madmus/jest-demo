@@ -11,13 +11,17 @@ export class MyApiService {
    * @param {string} customerId
    */
   public async getCustomer(customerId: string): Promise<Customer> {
-    const externalCustomer =
-      this.externalCustomerService.getCustomer(customerId);
+    const externalCustomer = await this.externalCustomerService.getCustomer(
+      customerId
+    );
+    const intermediateCustomer = await this.bookingService.getCustomer(
+      externalCustomer.customerId
+    );
 
-    const intermediateCustomer =
-      this.bookingService.getCustomer(externalCustomer);
     if (intermediateCustomer) {
-      const response = await fetch(intermediateCustomer.url);
+      const response = await fetch(
+        "http://localhost:5001/api" + intermediateCustomer.customerId
+      );
       const { customer }: LocalCustomer = await response.json();
       return customer;
     }
